@@ -1,0 +1,37 @@
+﻿id_producto,nombre,categoria,id_proveedor,costo_unitario,precio
+1,Arroz pilado 50 kg,Granos,1,154.88,221.57
+2,Quinua orgánica 25 kg,Granos,1,175.91,235.96
+3,Maíz amarillo duro 50 kg,Granos,1,84.34,106.01
+4,Maíz morado 25 kg,Granos,1,167.06,219.39
+5,Frejol canario 50 kg,Granos,1,78.37,111.78
+6,Trigo grano 50 kg,Granos,1,120.41,153.04
+7,Cebada grano 50 kg,Granos,1,153.2,199.46
+8,Lenteja 25 kg,Granos,1,109.3,165.38
+9,Kiwicha 25 kg,Granos,1,116.37,184.28
+10,Café pergamino 60 kg,Café y Cacao,3,439.8,581.39
+11,Café tostado molido 1 kg,Café y Cacao,3,271.53,341.66
+12,Café verde exportación 69 kg,Café y Cacao,2,463.96,708.3
+13,Cacao en grano 50 kg,Café y Cacao,3,275.46,438.71
+14,Cacao en polvo 25 kg,Café y Cacao,3,471.92,625.84
+15,Manteca de cacao 20 kg,Café y Cacao,2,591.71,871.9
+16,Nibs de cacao 10 kg,Café y Cacao,3,288.57,441.17
+17,Panela granulada 25 kg,Café y Cacao,2,104.0,147.38
+18,Azúcar rubia 50 kg,Café y Cacao,2,429.27,614.39
+19,Palta Hass caja 10 kg,Frutas,4,114.94,154.07
+20,Mango Kent caja 10 kg,Frutas,4,56.52,73.42
+21,Uva Red Globe caja 8 kg,Frutas,4,103.28,149.74
+22,Arándano caja 2 kg,Frutas,4,51.77,69.69
+23,Plátano orgánico caja 18 kg,Frutas,4,30.61,46.66
+24,Limón sutil saco 20 kg,Frutas,4,19.91,26.14
+25,Mandarina caja 10 kg,Frutas,4,95.64,128.05
+26,Piña golden caja 15 kg,Frutas,4,102.59,146.01
+27,Granada caja 8 kg,Frutas,4,73.0,113.15
+28,Urea 50 kg,Insumos,5,74.94,101.23
+29,Nitrato de amonio 50 kg,Insumos,6,199.64,263.48
+30,Fosfato diamónico 50 kg,Insumos,5,207.62,288.5
+31,Cloruro de potasio 50 kg,Insumos,5,105.98,169.42
+32,Compost orgánico 40 kg,Insumos,6,143.07,217.22
+33,Semilla de maíz híbrido 20 kg,Insumos,5,243.15,367.23
+34,Herbicida glifosato 20 L,Insumos,5,54.32,80.99
+35,Fungicida cobre 5 kg,Insumos,6,214.85,298.29
+36,Insecticida biológico 1 L,Insumos,5,253.08,342.2
