@@ -235,7 +235,7 @@ Esta solución puede servir como apoyo para:
 
 **Jesus Daniel Rojas Garcia**
 
-Proyecto de análisis de ventas, pronóstico y optimización de inventarios desarrollado con Python y SQL Server.
+Proyecto de análisis de ventas, pronóstico y optimización de inventarios desarrollado con Python ,SQL Server y Power Bi.
 
 ## 📄 Licencia
 
