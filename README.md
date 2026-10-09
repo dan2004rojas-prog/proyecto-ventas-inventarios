@@ -64,6 +64,8 @@ proyecto-ventas-inventarios/
 │
 ├── Dashboard_Ventas_Inventario.pbix
 │
+├── esquema_guide.pdf
+│
 └── README.md
 ```
 
