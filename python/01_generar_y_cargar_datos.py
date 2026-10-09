@@ -1,15 +1,7 @@
-# ============================================================
 # 01_generar_y_cargar_datos.py
-# Proyecto: Análisis predictivo de ventas e inventarios
-#
-# Este script hace dos cosas:
-#   1. Crea datos de ejemplo (proveedores, productos, ventas e inventario)
-#   2. Los guarda en archivos CSV y los carga en SQL Server
-#
-# Cómo usarlo:
-#   - Cambia los datos de la sección CONFIGURACIÓN (solo el servidor, si hace falta)
-#   - Ejecuta:  python python/01_generar_y_cargar_datos.py
-# ============================================================
+# Crea datos de ejemplo (proveedores, productos, ventas e inventario),
+# los guarda en CSV y los carga en SQL Server.
+# Uso: python python/01_generar_y_cargar_datos.py
 
 import math
 import urllib.parse
@@ -21,24 +13,19 @@ import pyodbc
 from sqlalchemy import create_engine, text
 
 
-# ============================================================
 # CONFIGURACIÓN (lo único que quizás tengas que cambiar)
-# ============================================================
-SERVIDOR = "DanServer"              # nombre del servidor (resultado de SERVERPROPERTY('MachineName'))
-BASE_DATOS = "VentasInventario"     # nombre de tu base de datos
-SOLO_CSV = False                    # True = solo crea los CSV y NO toca SQL Server
-SEMILLA = 42                        # con la misma semilla salen siempre los mismos datos
+SERVIDOR = "DanServer"              # nombre de tu servidor SQL Server
+BASE_DATOS = "VentasInventario"
+SOLO_CSV = False                    # True = solo crea los CSV, sin tocar SQL Server
+SEMILLA = 42
 
 FECHA_INICIO = "2023-10-01"
 FECHA_FIN = "2026-09-30"
 
-# Los CSV se guardan en la carpeta "data" del proyecto
 CARPETA_DATA = Path(__file__).resolve().parent.parent / "data"
 
 
-# ============================================================
 # DATOS BASE: proveedores, productos y categorías
-# ============================================================
 
 # Proveedores: (nombre, país, días que tarda en entregar)
 PROVEEDORES = [
@@ -131,11 +118,9 @@ PERFILES = {
 }
 
 
-# ============================================================
 # PASO 1: Crear los datos
-# ============================================================
 def crear_datos():
-    rng = np.random.default_rng(SEMILLA)       # generador de números aleatorios
+    rng = np.random.default_rng(SEMILLA)
     fechas = pd.date_range(FECHA_INICIO, FECHA_FIN, freq="D")
     n_dias = len(fechas)
 
@@ -146,11 +131,9 @@ def crear_datos():
     # ---------- Tabla Productos ----------
     lista_productos = []
     for numero, (nombre, categoria) in enumerate(PRODUCTOS, start=1):
-        # elegimos un proveedor al azar entre los de su categoría
         opciones = PROVEEDORES_POR_CATEGORIA[categoria]
         id_proveedor = int(rng.choice(opciones)) + 1
 
-        # precio al azar dentro del rango, y costo = 62% a 80% del precio
         precio_min, precio_max = RANGO_PRECIO[categoria]
         precio = round(float(rng.uniform(precio_min, precio_max)), 2)
         costo = round(precio * float(rng.uniform(0.62, 0.80)), 2)
@@ -163,48 +146,38 @@ def crear_datos():
     )
     n_productos = len(productos)
 
-    # días que tarda cada producto en llegar (según su proveedor)
     lead_time = []
     for id_prov in productos["id_proveedor"]:
         lead_time.append(PROVEEDORES[id_prov - 1][2])
 
-    # ---------- Demanda diaria de cada producto ----------
-    # Es una tabla de n_dias filas x n_productos columnas
     demanda = np.zeros((n_dias, n_productos), dtype=int)
     demanda_base_producto = []
 
-    meses = fechas.month.to_numpy() - 1           # enero = 0, diciembre = 11
-    dia_semana = fechas.dayofweek.to_numpy()      # lunes = 0, domingo = 6
-    anios_pasados = np.arange(n_dias) / 365.25    # años transcurridos desde el inicio
+    meses = fechas.month.to_numpy() - 1
+    dia_semana = fechas.dayofweek.to_numpy()
+    anios_pasados = np.arange(n_dias) / 365.25
 
-    # los fines de semana se vende menos
     factor_dia = np.where(dia_semana < 5, 1.05, np.where(dia_semana == 5, 0.90, 0.50))
 
     for j in range(n_productos):
         categoria = productos.loc[j, "categoria"]
 
-        base = DEMANDA_BASE[categoria] * rng.uniform(0.5, 1.6)   # venta diaria promedio
+        base = DEMANDA_BASE[categoria] * rng.uniform(0.5, 1.6)
         demanda_base_producto.append(base)
 
-        # tendencia: cada producto crece (o baja) entre -5% y +20% al año
         crecimiento = rng.uniform(-0.05, 0.20)
         tendencia = (1 + crecimiento) ** anios_pasados
 
-        # estacionalidad según el mes
         estacional = np.array(ESTACIONALIDAD[categoria])[meses]
 
-        # ruido aleatorio y algún pico raro (promociones)
         ruido = rng.lognormal(0, 0.12, n_dias)
         picos = np.where(rng.random(n_dias) < 0.005, 1.8, 1.0)
 
-        # demanda esperada de cada día y luego un valor aleatorio alrededor de ella
         esperada = base * tendencia * estacional * factor_dia * ruido * picos
         demanda[:, j] = rng.poisson(esperada)
 
-    # a cada producto le asignamos un tipo de manejo de inventario
     tipos = rng.choice(list(PERFILES), size=n_productos, p=[0.70, 0.15, 0.15])
 
-    # ---------- Simular inventario y ventas ----------
     # Día por día: llega mercadería, se vende, y se pide más si el stock está bajo.
     # Si no hay stock suficiente, la venta se pierde (así aparecen los quiebres).
     registros_ventas = []
@@ -216,15 +189,14 @@ def crear_datos():
         dias_entrega = lead_time[j]
         factor_pedido, dias_ciclo = PERFILES[tipos[j]]
 
-        # calculamos stock mínimo, punto de pedido y cantidad objetivo
         promedio = demanda_base_producto[j]
         stock_minimo = max(1, math.ceil(promedio * (dias_entrega + 5)))
         punto_pedido = max(1, math.ceil(stock_minimo * factor_pedido))
         objetivo = punto_pedido + math.ceil(promedio * dias_ciclo)
 
-        stock = objetivo          # empezamos con el stock lleno
-        pedido_pendiente = 0      # cantidad que está por llegar
-        dia_llegada = -1          # día en que llega ese pedido
+        stock = objetivo
+        pedido_pendiente = 0
+        dia_llegada = -1
 
         for t in range(n_dias):
 
@@ -245,7 +217,6 @@ def crear_datos():
             stock = stock - vendido
 
             if vendido > 0:
-                # el precio sube un 4% por año y varía un poco cada día
                 precio_dia = precio * (1 + 0.04 * anios_pasados[t]) * rng.uniform(0.97, 1.03)
                 monto = round(vendido * precio_dia, 2)
                 registros_ventas.append((fechas[t], id_producto, vendido, monto))
@@ -273,9 +244,7 @@ def crear_datos():
     }
 
 
-# ============================================================
 # PASO 2: Mostrar un resumen para revisar que los datos tengan sentido
-# ============================================================
 def mostrar_resumen(datos):
     ventas = datos["Ventas"]
     inventario = datos["Inventario"]
@@ -293,24 +262,18 @@ def mostrar_resumen(datos):
     print(f"Días con stock bajo el mínimo: {bajo_minimo:.1f}%")
 
 
-# ============================================================
 # PASO 3: Guardar los CSV
-# ============================================================
 def guardar_csv(datos):
-    CARPETA_DATA.mkdir(parents=True, exist_ok=True)     # crea la carpeta data si no existe
+    CARPETA_DATA.mkdir(parents=True, exist_ok=True)
     for nombre, tabla in datos.items():
         ruta = CARPETA_DATA / (nombre.lower() + ".csv")
         tabla.to_csv(ruta, index=False, encoding="utf-8-sig")
         print("CSV guardado:", ruta)
 
 
-# ============================================================
 # PASO 4: Cargar los datos en SQL Server
-# ============================================================
 def buscar_driver():
-    # Busca los drivers ODBC modernos instalados en tu PC y elige el más nuevo.
-    # (El driver antiguo llamado solo "SQL Server" no sirve: no se conecta
-    #  bien a las versiones nuevas, por eso lo ignoramos)
+    # usa solo los drivers modernos (el antiguo 'SQL Server' no sirve)
     drivers = [d for d in pyodbc.drivers() if d.startswith("ODBC Driver") and "SQL Server" in d]
     if len(drivers) == 0:
         print("Drivers que tienes instalados:", pyodbc.drivers())
@@ -326,7 +289,6 @@ def cargar_en_sql_server(datos):
     driver = buscar_driver()
     print(f"\nConectando a {SERVIDOR} / {BASE_DATOS} (driver: {driver})")
 
-    # Cadena de conexión con tu usuario de Windows (Trusted_Connection)
     conexion = (
         f"DRIVER={{{driver}}};"
         f"SERVER={SERVIDOR};"
@@ -335,9 +297,8 @@ def cargar_en_sql_server(datos):
         "TrustServerCertificate=yes;"
     )
     url = "mssql+pyodbc:///?odbc_connect=" + urllib.parse.quote_plus(conexion)
-    motor = create_engine(url, fast_executemany=True)   # fast_executemany = inserta más rápido
+    motor = create_engine(url, fast_executemany=True)
 
-    # En SQL Server las fechas se guardan como DATE (sin hora)
     ventas = datos["Ventas"].copy()
     ventas["fecha"] = ventas["fecha"].dt.date
     inventario = datos["Inventario"].copy()
@@ -346,7 +307,6 @@ def cargar_en_sql_server(datos):
     proveedores = datos["Proveedores"]
     productos = datos["Productos"]
 
-    # A las ventas les ponemos su id (1, 2, 3...) para controlarlo nosotros
     ventas.insert(0, "id_venta", range(1, len(ventas) + 1))
 
     with motor.begin() as conn:
@@ -355,10 +315,8 @@ def cargar_en_sql_server(datos):
         for tabla in ["Inventario", "Ventas", "Productos", "Proveedores"]:
             conn.execute(text("DELETE FROM " + tabla))
 
-        # Insertamos primero las tablas "padre" y al final las "hijas".
-        # Las tablas con id automático (IDENTITY) necesitan que activemos
-        # IDENTITY_INSERT para poder escribir nosotros los id (1, 2, 3...).
-        # El tercer dato indica si la tabla tiene IDENTITY.
+        # Primero las tablas "padre" y al final las "hijas"
+        # IDENTITY_INSERT permite escribir nosotros los id (1, 2, 3...)
         orden = [
             ("Proveedores", proveedores, True),
             ("Productos", productos, True),
@@ -375,7 +333,6 @@ def cargar_en_sql_server(datos):
                 conn.execute(text(f"SET IDENTITY_INSERT {nombre} OFF"))
             print(f"  {nombre:<12} {len(tabla):>8,} filas cargadas")
 
-    # Revisamos cuántas filas quedaron en cada tabla
     print("\nFilas que hay ahora en SQL Server:")
     with motor.connect() as conn:
         for nombre in ["Proveedores", "Productos", "Ventas", "Inventario"]:
@@ -383,9 +340,7 @@ def cargar_en_sql_server(datos):
             print(f"  {nombre:<12} {total:>8,}")
 
 
-# ============================================================
 # PROGRAMA PRINCIPAL
-# ============================================================
 if __name__ == "__main__":
     print("Creando datos de ejemplo...")
     datos = crear_datos()
