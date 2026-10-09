@@ -233,7 +233,7 @@ Esta solución puede servir como apoyo para:
 
 ## 👨‍💻 Autor
 
-**Daniel Rojas Garcia**
+**Jesus Daniel Rojas Garcia**
 
 Proyecto de análisis de ventas, pronóstico y optimización de inventarios desarrollado con Python y SQL Server.
 
