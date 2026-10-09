@@ -193,6 +193,30 @@ Los principales resultados se encuentran en `docs/`:
 | `05_pronostico_total.png`         | Visualización del pronóstico                |
 | `06_error_por_modelo.png`         | Comparación de errores                      |
 
+## Dashboard de Power BI
+
+Se desarrolló un dashboard interactivo para analizar las ventas y controlar el inventario, utilizando Power BI Desktop y SQL Server como fuente de datos.
+
+### Análisis de ventas
+
+* Evolución mensual de las ventas.
+* Ventas totales por categoría.
+* Indicadores de ventas totales y unidades vendidas.
+
+### Control de inventario
+
+* Tabla de productos con categoría, stock actual, stock mínimo, días de cobertura y estado.
+* Indicadores de productos en quiebre, bajo mínimo, con stock normal y en exceso.
+* Gráfico de barras para comparar los productos por estado de inventario.
+* Formato condicional para identificar visualmente los estados del inventario.
+
+### Herramientas utilizadas
+
+* SQL Server: almacenamiento y consulta de datos.
+* Power BI Desktop: visualización y análisis.
+* Git y GitHub: control de versiones del proyecto.
+
+
 ## 💡 Aplicaciones del proyecto
 
 Esta solución puede servir como apoyo para:
