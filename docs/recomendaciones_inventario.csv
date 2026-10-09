@@ -1,0 +1,37 @@
+﻿id_producto,producto,categoria,proveedor,fecha_corte,stock_actual,stock_minimo,lead_time_dias,demanda_diaria_pronosticada,desviacion_demanda_diaria,stock_seguridad,punto_reorden,stock_objetivo,dias_cobertura_pronosticados,unidades_a_comprar,estado_alerta
+11,Café tostado molido 1 kg,Café y Cacao,Cacao Selva Central,2026-09-30,488,638,14,23.41,13.08,81,409,1112,20.8,624,BAJO MINIMO
+12,Café verde exportación 69 kg,Café y Cacao,Cooperativa Cafetalera del Norte,2026-09-30,307,397,10,19.98,8.59,45,245,845,15.4,538,BAJO MINIMO
+3,Maíz amarillo duro 50 kg,Granos,Molinos y Granos del Sur,2026-09-30,688,728,7,64.89,17.38,76,531,2477,10.6,1789,BAJO MINIMO
+18,Azúcar rubia 50 kg,Café y Cacao,Cooperativa Cafetalera del Norte,2026-09-30,788,585,10,33.18,13.28,70,402,1398,23.7,0,OK
+14,Cacao en polvo 25 kg,Café y Cacao,Cacao Selva Central,2026-09-30,1382,762,14,34.42,12.26,76,558,1591,40.1,0,OK
+15,Manteca de cacao 20 kg,Café y Cacao,Cooperativa Cafetalera del Norte,2026-09-30,624,389,10,21.77,9.48,50,268,921,28.7,0,OK
+16,Nibs de cacao 10 kg,Café y Cacao,Cacao Selva Central,2026-09-30,1842,975,14,44.43,14.85,92,715,2048,41.5,0,OK
+17,Panela granulada 25 kg,Café y Cacao,Cooperativa Cafetalera del Norte,2026-09-30,1086,669,10,38.24,14.97,79,462,1609,28.4,0,OK
+22,Arándano caja 2 kg,Frutas,Agroexport Valle Verde,2026-09-30,774,310,5,42.92,9.22,35,250,1538,18.0,0,OK
+27,Granada caja 8 kg,Frutas,Agroexport Valle Verde,2026-09-30,1835,411,5,58.0,12.11,45,335,2075,31.6,0,OK
+24,Limón sutil saco 20 kg,Frutas,Agroexport Valle Verde,2026-09-30,1833,995,5,138.4,26.94,100,793,4945,13.2,0,OK
+25,Mandarina caja 10 kg,Frutas,Agroexport Valle Verde,2026-09-30,1726,631,5,87.84,18.35,68,508,3143,19.7,0,OK
+20,Mango Kent caja 10 kg,Frutas,Agroexport Valle Verde,2026-09-30,768,419,5,58.58,12.95,48,341,2099,13.1,0,OK
+19,Palta Hass caja 10 kg,Frutas,Agroexport Valle Verde,2026-09-30,1670,687,5,96.67,19.37,72,556,3456,17.3,0,OK
+26,Piña golden caja 15 kg,Frutas,Agroexport Valle Verde,2026-09-30,1525,831,5,117.83,24.09,89,679,4213,12.9,0,OK
+23,Plátano orgánico caja 18 kg,Frutas,Agroexport Valle Verde,2026-09-30,1865,1124,5,149.72,30.95,115,864,5356,12.5,0,OK
+21,Uva Red Globe caja 8 kg,Frutas,Agroexport Valle Verde,2026-09-30,681,260,5,37.37,8.27,31,218,1339,18.2,0,OK
+1,Arroz pilado 50 kg,Granos,Molinos y Granos del Sur,2026-09-30,1187,628,7,53.98,13.13,58,436,2056,22.0,0,OK
+5,Frejol canario 50 kg,Granos,Molinos y Granos del Sur,2026-09-30,507,432,7,39.36,11.85,52,328,1509,12.9,0,OK
+9,Kiwicha 25 kg,Granos,Molinos y Granos del Sur,2026-09-30,532,320,7,27.89,8.47,37,233,1069,19.1,0,OK
+8,Lenteja 25 kg,Granos,Molinos y Granos del Sur,2026-09-30,1244,505,7,42.66,10.99,48,347,1627,29.2,0,OK
+4,Maíz morado 25 kg,Granos,Molinos y Granos del Sur,2026-09-30,861,460,7,39.08,10.29,45,319,1491,22.0,0,OK
+2,Quinua orgánica 25 kg,Granos,Molinos y Granos del Sur,2026-09-30,926,805,7,66.93,17.4,76,545,2553,13.8,0,OK
+6,Trigo grano 50 kg,Granos,Molinos y Granos del Sur,2026-09-30,1163,550,7,47.39,12.0,53,385,1807,24.5,0,OK
+32,Compost orgánico 40 kg,Insumos,Importadora AgroGlobal,2026-09-30,1234,515,25,21.5,6.55,55,593,1238,57.4,0,OK
+30,Fosfato diamónico 50 kg,Insumos,AgroInsumos Andinos,2026-09-30,686,457,12,33.84,10.47,60,467,1482,20.3,0,OK
+33,Semilla de maíz híbrido 20 kg,Insumos,AgroInsumos Andinos,2026-09-30,920,539,12,40.5,11.2,64,550,1765,22.7,0,OK
+28,Urea 50 kg,Insumos,AgroInsumos Andinos,2026-09-30,1193,333,12,24.37,7.86,45,338,1069,49.0,0,OK
+31,Cloruro de potasio 50 kg,Insumos,AgroInsumos Andinos,2026-09-30,0,213,12,13.64,5.47,32,196,605,0.0,605,QUIEBRE
+13,Cacao en grano 50 kg,Café y Cacao,Cacao Selva Central,2026-09-30,84,673,14,27.35,14.66,91,474,1295,3.1,1211,REORDENAR
+10,Café pergamino 60 kg,Café y Cacao,Cacao Selva Central,2026-09-30,82,315,14,12.86,7.64,48,229,614,6.4,532,REORDENAR
+7,Cebada grano 50 kg,Granos,Molinos y Granos del Sur,2026-09-30,259,393,7,35.32,9.87,44,292,1351,7.3,1092,REORDENAR
+35,Fungicida cobre 5 kg,Insumos,Importadora AgroGlobal,2026-09-30,214,254,25,9.91,4.29,36,284,582,21.6,368,REORDENAR
+34,Herbicida glifosato 20 L,Insumos,AgroInsumos Andinos,2026-09-30,457,545,12,43.57,11.83,68,591,1898,10.5,1441,REORDENAR
+36,Insecticida biológico 1 L,Insumos,AgroInsumos Andinos,2026-09-30,375,406,12,30.75,8.8,51,420,1343,12.2,968,REORDENAR
+29,Nitrato de amonio 50 kg,Insumos,Importadora AgroGlobal,2026-09-30,359,546,25,23.11,5.97,50,628,1321,15.5,962,REORDENAR
