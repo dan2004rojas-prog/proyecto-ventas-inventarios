@@ -62,6 +62,8 @@ proyecto-ventas-inventarios/
 │   ├── 02_tablas.sql
 │   └── 03_consultas_y_vistas.sql
 │
+├── Dashboard_Ventas_Inventario.pbix
+│
 └── README.md
 ```
 
