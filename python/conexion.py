@@ -1,8 +1,3 @@
-# conexion.py
-# Crea el motor SQLAlchemy para conectarse a SQL Server.
-# La configuración se lee del archivo .env (nunca hardcodeada aquí).
-# Copia .env.example → .env y ajusta los valores a tu entorno.
-
 import os
 import urllib.parse
 from pathlib import Path
@@ -11,7 +6,7 @@ import pyodbc
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
-# Carga las variables de .env (busca desde la raíz del proyecto)
+
 _RAIZ = Path(__file__).resolve().parent.parent
 load_dotenv(_RAIZ / ".env")
 
@@ -23,7 +18,7 @@ DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 
 
 def buscar_driver():
-    """Devuelve el driver ODBC de SQL Server más nuevo instalado en el sistema."""
+  
     drivers = [d for d in pyodbc.drivers() if d.startswith("ODBC Driver") and "SQL Server" in d]
     if not drivers:
         print("Drivers detectados:", pyodbc.drivers())
@@ -35,13 +30,7 @@ def buscar_driver():
 
 
 def crear_motor():
-    """
-    Crea y devuelve un motor SQLAlchemy conectado a SQL Server.
-
-    Métodos de autenticación (configurados en .env):
-      DB_AUTH=windows  → Windows Authentication (Trusted_Connection)
-      DB_AUTH=sql      → SQL Server Authentication (DB_USUARIO / DB_PASSWORD)
-    """
+  
     driver = buscar_driver()
 
     if DB_AUTH == "windows":

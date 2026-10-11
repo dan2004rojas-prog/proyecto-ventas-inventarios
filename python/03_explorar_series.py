@@ -14,7 +14,6 @@ from statsmodels.tsa.stattools import adfuller
 from conexion import crear_motor
 
 
-# CONFIGURACIÓN
 
 CARPETA_GRAFICOS = Path(__file__).resolve().parent.parent / "docs" / "graficos"
 
@@ -35,7 +34,6 @@ FONDO = "#fcfcfb"
 MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
 
 
-# FUNCIONES PARA LOS GRÁFICOS
 def preparar_estilo():
     
     plt.rcParams.update({
@@ -90,7 +88,6 @@ def guardar(fig, nombre):
     print("Gráfico guardado:", ruta)
 
 
-# PASO 1: Leer los datos desde SQL Server
 def leer_datos():
     motor = crear_motor()
     df = pd.read_sql("SELECT * FROM vw_ventas_mensuales", motor)
@@ -98,7 +95,6 @@ def leer_datos():
     return df
 
 
-# PASO 2: Revisar que los datos estén completos
 def revisar_datos(df):
     print("\n--- Revisión de los datos ---")
     print("Filas leídas      :", len(df))
@@ -114,7 +110,6 @@ def revisar_datos(df):
     print("Valores nulos     :", int(df[["unidades", "ventas"]].isna().sum().sum()))
 
 
-# PASO 3: Armar las series de tiempo
 def armar_series(df):
     
     total = df.groupby("mes")["unidades"].sum()
@@ -128,7 +123,6 @@ def armar_series(df):
     return total, por_categoria
 
 
-# PASO 4: Los 4 gráficos
 def grafico_total(total):
     fig, ax = plt.subplots(figsize=(10, 4.5))
     ax.plot(total.index, total.values, color=COLOR_TOTAL)
@@ -195,8 +189,6 @@ def grafico_descomposicion(total):
 
 
 def grafico_estacionalidad(por_categoria):
-    # Para cada mes del año: ¿cuánto se vende respecto al promedio?
-    # 1.0 = promedio, 1.3 = 30% más que el promedio, 0.8 = 20% menos
     indice = por_categoria.groupby(por_categoria.index.month).mean() / por_categoria.mean()
 
     fig, ax = plt.subplots(figsize=(10, 4.8))
@@ -215,12 +207,7 @@ def grafico_estacionalidad(por_categoria):
     guardar(fig, "04_estacionalidad_categoria.png")
 
 
-# PASO 5: Prueba ADF (¿la serie es estacionaria?)
 def prueba_adf(serie):
-    # Devuelve el p-valor de la prueba.
-    # p < 0.05  -> la serie es estacionaria (su promedio no cambia con el tiempo)
-    # p >= 0.05 -> NO es estacionaria 
-    # maxlag=4 porque nuestras series son cortas (36 meses)
     return adfuller(serie.dropna(), maxlag=4)[1]
 
 
@@ -245,7 +232,6 @@ def mostrar_adf(total, por_categoria):
         print(f"{nombre:<16}{p_original:>12.3f}{p_diferenciada:>16.3f}   {conclusion}")
 
 
-# PROGRAMA PRINCIPAL
 if __name__ == "__main__":
     preparar_estilo()
 

@@ -1,9 +1,3 @@
-# ============================================================
-# 04_modelos_y_pronostico.py
-# Compara 3 modelos de pronóstico, elige el mejor para cada producto
-# y guarda el pronóstico de los próximos 6 meses en SQL Server.
-# Uso: python python/04_modelos_y_pronostico.py
-# ============================================================
 
 import warnings
 from pathlib import Path
@@ -22,11 +16,8 @@ from conexion import crear_motor
 warnings.filterwarnings("ignore")
 
 
-# ============================================================
-# CONFIGURACIÓN
-# ============================================================
-MESES_PRUEBA = 6        # últimos meses que se guardan para evaluar los modelos
-MESES_FUTURO = 6        # meses que vamos a pronosticar
+MESES_PRUEBA = 6        
+MESES_FUTURO = 6        
 
 CARPETA_DOCS = Path(__file__).resolve().parent.parent / "docs"
 
@@ -38,12 +29,7 @@ TEXTO_SUAVE = "#52514e"
 GRILLA = "#e6e5e1"
 
 
-# ============================================================
-# LOS 3 MODELOS
-# Cada uno recibe la serie (números) y la cantidad de meses a pronosticar
-# ============================================================
 def modelo_naive(serie, n):
-    # repite lo que se vendió el mismo mes del año anterior
     return serie[-12:][:n]
 
 
@@ -64,22 +50,15 @@ MODELOS = {
 }
 
 
-# ============================================================
-# PASO 1: Leer las ventas mensuales
-# ============================================================
 def leer_datos(motor):
     df = pd.read_sql("SELECT * FROM vw_ventas_mensuales", motor)
     df["mes"] = pd.to_datetime(df["mes"])
     tabla = df.pivot_table(index="mes", columns="id_producto", values="unidades", aggfunc="sum")
-    return tabla.asfreq("MS").fillna(0)       # una columna por producto
+    return tabla.asfreq("MS").fillna(0)       
 
 
-# ============================================================
-# PASO 2: Evaluar los modelos
-# Entrenamos con los primeros meses y comparamos contra los últimos 6
-# ============================================================
 def calcular_errores(real, pred):
-    mape = np.mean(np.abs((real - pred) / real)) * 100     # error en %
+    mape = np.mean(np.abs((real - pred) / real)) * 100     
     rmse = np.sqrt(np.mean((real - pred) ** 2))
     mae = np.mean(np.abs(real - pred))
     return mape, rmse, mae
@@ -103,9 +82,6 @@ def evaluar_modelos(tabla):
     return pd.DataFrame(filas, columns=["id_producto", "modelo", "mape", "rmse", "mae"])
 
 
-# ============================================================
-# PASO 3: Pronosticar los próximos meses con el mejor modelo de cada producto
-# ============================================================
 def pronosticar_futuro(tabla, mejor_modelo):
     primer_mes = tabla.index[-1] + pd.offsets.MonthBegin(1)
     meses = pd.date_range(primer_mes, periods=MESES_FUTURO, freq="MS")
@@ -127,9 +103,6 @@ def pronosticar_futuro(tabla, mejor_modelo):
     return pd.DataFrame(filas, columns=["id_producto", "mes", "unidades_pronosticadas", "modelo"])
 
 
-# ============================================================
-# PASO 4: Gráficos
-# ============================================================
 def estilo_ejes(ax):
     ax.set_facecolor(FONDO)
     ax.spines["top"].set_visible(False)
@@ -158,7 +131,6 @@ def grafico_pronostico(tabla, pronostico):
     historico = tabla.sum(axis=1)
     futuro = pronostico.groupby("mes")["unidades_pronosticadas"].sum()
 
-    # unimos el último mes real con el pronóstico para que la línea no quede cortada
     futuro = pd.concat([historico.iloc[[-1]], futuro])
 
     fig, ax = plt.subplots(figsize=(10, 4.8), facecolor=FONDO)
@@ -185,9 +157,6 @@ def grafico_errores(promedios):
     guardar(fig, "06_error_por_modelo.png")
 
 
-# ============================================================
-# PROGRAMA PRINCIPAL
-# ============================================================
 if __name__ == "__main__":
     motor = crear_motor()
 
@@ -202,7 +171,6 @@ if __name__ == "__main__":
     print("\n--- Error promedio por modelo ---")
     print(promedios)
 
-    # el mejor modelo de cada producto es el que tiene menor MAPE
     validos = resultados.dropna(subset=["mape"])
     ganadores = validos.loc[validos.groupby("id_producto")["mape"].idxmin()]
     mejor_modelo = dict(zip(ganadores["id_producto"], ganadores["modelo"]))
@@ -218,7 +186,6 @@ if __name__ == "__main__":
     grafico_pronostico(tabla, pronostico)
     grafico_errores(promedios)
 
-    # guardamos el pronóstico en SQL Server (reemplaza la tabla si ya existía)
     pronostico["mes"] = pronostico["mes"].dt.date
     pronostico.to_sql("Pronostico_Ventas", motor, if_exists="replace", index=False)
     print("\nTabla Pronostico_Ventas guardada en SQL Server:", len(pronostico), "filas")

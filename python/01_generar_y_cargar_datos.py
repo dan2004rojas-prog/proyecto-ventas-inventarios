@@ -1,7 +1,3 @@
-# 01_generar_y_cargar_datos.py
-# Crea datos de ejemplo (proveedores, productos, ventas e inventario),
-# los guarda en CSV y los carga en SQL Server.
-# Uso: python python/01_generar_y_cargar_datos.py
 
 import math
 from pathlib import Path
@@ -12,7 +8,6 @@ from sqlalchemy import text
 
 from conexion import crear_motor
 
-# True = solo crea los CSV sin conectarse a SQL Server
 SOLO_CSV = False
 SEMILLA = 42
 
@@ -22,9 +17,7 @@ FECHA_FIN = "2026-09-30"
 CARPETA_DATA = Path(__file__).resolve().parent.parent / "data"
 
 
-# DATOS BASE: proveedores, productos y categorías
 
-# Proveedores: (nombre, país, días que tarda en entregar)
 PROVEEDORES = [
     ("Molinos y Granos del Sur", "Perú", 7),
     ("Cooperativa Cafetalera del Norte", "Perú", 10),
@@ -34,7 +27,6 @@ PROVEEDORES = [
     ("Importadora AgroGlobal", "Chile", 25),
 ]
 
-# Qué proveedores (posición en la lista de arriba) abastecen cada categoría
 PROVEEDORES_POR_CATEGORIA = {
     "Granos": [0],
     "Café y Cacao": [1, 2],
@@ -42,7 +34,6 @@ PROVEEDORES_POR_CATEGORIA = {
     "Insumos": [4, 5],
 }
 
-# Productos: (nombre, categoría)
 PRODUCTOS = [
     ("Arroz pilado 50 kg", "Granos"),
     ("Quinua orgánica 25 kg", "Granos"),
@@ -85,10 +76,8 @@ PRODUCTOS = [
     ("Insecticida biológico 1 L", "Insumos"),
 ]
 
-# Unidades que se venden por día, en promedio, según la categoría
 DEMANDA_BASE = {"Granos": 40, "Café y Cacao": 25, "Frutas": 60, "Insumos": 20}
 
-# Rango de precios (en soles) según la categoría
 RANGO_PRECIO = {
     "Granos": (90, 260),
     "Café y Cacao": (35, 900),
@@ -96,8 +85,6 @@ RANGO_PRECIO = {
     "Insumos": (60, 420),
 }
 
-# Estacionalidad: cuánto sube o baja la venta en cada mes (enero a diciembre)
-# 1.0 = normal, 1.3 = 30% más de lo normal, 0.8 = 20% menos
 ESTACIONALIDAD = {
     "Granos":       [0.90, 0.90, 1.00, 1.15, 1.25, 1.15, 1.00, 0.95, 0.90, 0.90, 0.95, 1.05],
     "Café y Cacao": [0.80, 0.80, 0.85, 0.95, 1.10, 1.30, 1.35, 1.20, 1.00, 0.90, 0.95, 1.10],
@@ -105,27 +92,21 @@ ESTACIONALIDAD = {
     "Insumos":      [0.85, 0.90, 1.20, 1.25, 0.90, 0.80, 0.80, 0.90, 1.20, 1.35, 1.25, 0.95],
 }
 
-# Tipos de manejo de inventario (para que haya productos bien y mal gestionados)
-#   primer número  = cuándo se pide mercadería (más alto = se pide antes)
-#   segundo número = cuántos días de venta se compran en cada pedido
 PERFILES = {
-    "equilibrado": (1.80, 15),      # manejo normal
-    "riesgo_quiebre": (0.90, 8),    # pide tarde y poco -> se queda sin stock
-    "sobrestock": (1.80, 70),       # compra de más -> inventario excesivo
+    "equilibrado": (1.80, 15),      
+    "riesgo_quiebre": (0.90, 8),    
+    "sobrestock": (1.80, 70),       
 }
 
 
-# PASO 1: Crear los datos
 def crear_datos():
     rng = np.random.default_rng(SEMILLA)
     fechas = pd.date_range(FECHA_INICIO, FECHA_FIN, freq="D")
     n_dias = len(fechas)
 
-    # ---------- Tabla Proveedores ----------
     proveedores = pd.DataFrame(PROVEEDORES, columns=["nombre", "pais", "lead_time_dias"])
     proveedores.insert(0, "id_proveedor", range(1, len(proveedores) + 1))
 
-    # ---------- Tabla Productos ----------
     lista_productos = []
     for numero, (nombre, categoria) in enumerate(PRODUCTOS, start=1):
         opciones = PROVEEDORES_POR_CATEGORIA[categoria]
@@ -175,8 +156,6 @@ def crear_datos():
 
     tipos = rng.choice(list(PERFILES), size=n_productos, p=[0.70, 0.15, 0.15])
 
-    # Día por día: llega mercadería, se vende, y se pide más si el stock está bajo.
-    # Si no hay stock suficiente, la venta se pierde (así aparecen los quiebres).
     registros_ventas = []
     registros_inventario = []
 
@@ -197,19 +176,16 @@ def crear_datos():
 
         for t in range(n_dias):
 
-            # cada 30 días recalculamos las reglas con las ventas de los últimos 60 días
             if t >= 60 and t % 30 == 0:
                 promedio = max(1.0, demanda[t - 60:t, j].mean())
                 stock_minimo = max(1, math.ceil(promedio * (dias_entrega + 5)))
                 punto_pedido = max(1, math.ceil(stock_minimo * factor_pedido))
                 objetivo = punto_pedido + math.ceil(promedio * dias_ciclo)
 
-            # 1) ¿llegó el pedido?
             if pedido_pendiente > 0 and t >= dia_llegada:
                 stock = stock + pedido_pendiente
                 pedido_pendiente = 0
 
-            # 2) vendemos lo que se pueda (no más del stock que hay)
             vendido = int(min(demanda[t, j], stock))
             stock = stock - vendido
 
@@ -218,13 +194,11 @@ def crear_datos():
                 monto = round(vendido * precio_dia, 2)
                 registros_ventas.append((fechas[t], id_producto, vendido, monto))
 
-            # 3) si el stock está bajo y no hay pedido en camino, pedimos más
             if pedido_pendiente == 0 and stock <= punto_pedido:
                 pedido_pendiente = max(1, objetivo - stock)
                 demora = max(1, dias_entrega + int(rng.integers(-1, 3)))
                 dia_llegada = t + demora
 
-            # 4) guardamos cómo quedó el inventario al final del día
             registros_inventario.append((id_producto, fechas[t], int(stock), int(stock_minimo)))
 
     ventas = pd.DataFrame(registros_ventas, columns=["fecha", "id_producto", "cantidad", "monto"])
@@ -241,7 +215,6 @@ def crear_datos():
     }
 
 
-# PASO 2: Mostrar un resumen para revisar que los datos tengan sentido
 def mostrar_resumen(datos):
     ventas = datos["Ventas"]
     inventario = datos["Inventario"]
@@ -259,7 +232,6 @@ def mostrar_resumen(datos):
     print(f"Días con stock bajo el mínimo: {bajo_minimo:.1f}%")
 
 
-# PASO 3: Guardar los CSV
 def guardar_csv(datos):
     CARPETA_DATA.mkdir(parents=True, exist_ok=True)
     for nombre, tabla in datos.items():
@@ -268,7 +240,6 @@ def guardar_csv(datos):
         print("CSV guardado:", ruta)
 
 
-# PASO 4: Cargar los datos en SQL Server
 def cargar_en_sql_server(datos):
     motor = crear_motor()
 
@@ -283,13 +254,10 @@ def cargar_en_sql_server(datos):
     ventas.insert(0, "id_venta", range(1, len(ventas) + 1))
 
     with motor.begin() as conn:
-        # Borramos lo que hubiera antes (primero las tablas "hijas")
         print("Borrando datos anteriores...")
         for tabla in ["Inventario", "Ventas", "Productos", "Proveedores"]:
             conn.execute(text("DELETE FROM " + tabla))
 
-        # Primero las tablas "padre" y al final las "hijas"
-        # IDENTITY_INSERT permite escribir nosotros los id (1, 2, 3...)
         orden = [
             ("Proveedores", proveedores, True),
             ("Productos", productos, True),
@@ -313,7 +281,6 @@ def cargar_en_sql_server(datos):
             print(f"  {nombre:<12} {total:>8,}")
 
 
-# PROGRAMA PRINCIPAL
 if __name__ == "__main__":
     print("Creando datos de ejemplo...")
     datos = crear_datos()

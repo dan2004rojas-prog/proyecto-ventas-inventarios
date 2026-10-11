@@ -3,9 +3,7 @@ USE VentasInventario;
 GO
 
 
-/* ============================================================
-   PARTE 1: CONSULTAS DE ANÁLISIS
-   ============================================================ */
+--PARTE 1: CONSULTAS DE ANÁLISIS--
 
 SELECT
     YEAR(v.fecha)   AS anio,
@@ -19,9 +17,9 @@ GROUP BY YEAR(v.fecha), MONTH(v.fecha), p.categoria
 ORDER BY anio, mes, p.categoria;
 
 
--- ------------------------------------------------------------
--- 2) Media móvil de 3 meses por producto
--- ------------------------------------------------------------
+ 
+--2) Media móvil de 3 meses por producto
+
 WITH mensual AS (
     SELECT
         id_producto,
@@ -44,9 +42,9 @@ FROM mensual
 ORDER BY id_producto, mes;
 
 
--- ------------------------------------------------------------
+
 -- 3) Crecimiento mes a mes por categoría 
--- ------------------------------------------------------------
+
 WITH mensual AS (
     SELECT
         p.categoria,
@@ -69,10 +67,10 @@ FROM mensual
 ORDER BY categoria, mes;
 
 
--- ------------------------------------------------------------
+
 -- 4) Ranking de productos dentro de su categoría 
 --    El producto con más ventas de cada categoría queda en el puesto 1.
--- ------------------------------------------------------------
+
 SELECT
     p.categoria,
     p.nombre AS producto,
@@ -84,11 +82,11 @@ GROUP BY p.categoria, p.nombre
 ORDER BY p.categoria, ranking;
 
 
--- ------------------------------------------------------------
+
 -- 5) Estado del inventario en el último día registrado
 --    Clasifica cada producto: QUIEBRE, BAJO MÍNIMO, EXCESO u OK.
 --    (Exceso = más de 3 veces el stock mínimo)
--- ------------------------------------------------------------
+
 SELECT
     p.nombre AS producto,
     p.categoria,
@@ -106,12 +104,12 @@ WHERE i.fecha = (SELECT MAX(fecha) FROM Inventario)
 ORDER BY estado, p.categoria, p.nombre;
 
 
--- ------------------------------------------------------------
+
 -- 6) Días de cobertura
 --    Cuántos días durará el stock actual si se sigue vendiendo
 --    al ritmo de los últimos 30 días.
 --    días de cobertura = stock actual / venta diaria promedio
--- ------------------------------------------------------------
+
 WITH ultimo_dia AS (
     SELECT MAX(fecha) AS fecha FROM Inventario
 ),
@@ -139,12 +137,12 @@ WHERE i.fecha = u.fecha
 ORDER BY dias_cobertura;
 
 
--- ------------------------------------------------------------
+
 -- 7) Rotación de inventario (últimos 12 meses)
 --    rotación = unidades vendidas en 12 meses / stock promedio
 --    Una rotación alta = el producto se mueve rápido.
 --    Una rotación baja = hay inventario parado.
--- ------------------------------------------------------------
+
 WITH ultimo_dia AS (
     SELECT MAX(fecha) AS fecha FROM Inventario
 ),
@@ -175,15 +173,9 @@ ORDER BY rotacion DESC;
 GO
 
 
-/* ============================================================
-   PARTE 2: VISTAS
-  
-   ============================================================ */
-
-/*-- ------------------------------------------------------------
+--PARTE 2: VISTAS
 -- Vista 1: ventas mensuales por producto
---          
--- ------------------------------------------------------------ */
+
 CREATE OR ALTER VIEW vw_ventas_mensuales AS
 SELECT
     p.id_producto,
@@ -202,10 +194,7 @@ GROUP BY
 GO
 
 
-/*-- ------------------------------------------------------------
 -- Vista 2: estado actual del inventario
---         
--- ------------------------------------------------------------*/
 CREATE OR ALTER VIEW vw_estado_inventario AS
 WITH ultimo_dia AS (
     SELECT MAX(fecha) AS fecha FROM Inventario
@@ -245,9 +234,7 @@ WHERE i.fecha = u.fecha;
 GO
 
 
--- ------------------------------------------------------------
 -- Comprobamos que las vistas funcionan
--- ------------------------------------------------------------
 SELECT TOP 10 * FROM vw_ventas_mensuales ORDER BY mes, id_producto;
 SELECT * FROM vw_estado_inventario ORDER BY estado, categoria;
 GO

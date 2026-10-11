@@ -1,7 +1,4 @@
 
-# 05_optimizacion_inventario.py
-# Calcula stock de seguridad, punto de reorden,
-# cobertura, alertas y unidades sugeridas de compra.
 
 from pathlib import Path
 import math
@@ -13,9 +10,6 @@ from sqlalchemy import text
 from conexion import crear_motor
 
 
-# ------------------------------------------------------------
-# CONFIGURACION
-# ------------------------------------------------------------
 
 CARPETA_PROYECTO = Path(__file__).resolve().parent.parent
 CARPETA_DOCS = CARPETA_PROYECTO / "docs"
@@ -24,7 +18,6 @@ DIAS_HISTORICOS = 90
 MESES_PRONOSTICO = 3
 DIAS_REVISION = 30
 
-# Factor Z aproximado para un nivel de servicio del 95 %
 FACTOR_SEGURIDAD = 1.65
 
 TABLA_SALIDA = "Recomendacion_Inventario"
@@ -310,8 +303,6 @@ def guardar_resultados(resultado, motor):
         ruta_csv, index=False, encoding="utf-8-sig"
     )
 
-    # Solo reemplaza la tabla de recomendaciones,
-    # no las tablas originales de ventas o inventario.
     resultado.to_sql(
         TABLA_SALIDA,
         motor,
