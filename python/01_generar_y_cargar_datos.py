@@ -4,19 +4,16 @@
 # Uso: python python/01_generar_y_cargar_datos.py
 
 import math
-import urllib.parse
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import pyodbc
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
+from conexion import crear_motor
 
-# CONFIGURACIÓN (lo único que quizás tengas que cambiar)
-SERVIDOR = "DanServer"              # nombre de tu servidor SQL Server
-BASE_DATOS = "VentasInventario"
-SOLO_CSV = False                    # True = solo crea los CSV, sin tocar SQL Server
+# True = solo crea los CSV sin conectarse a SQL Server
+SOLO_CSV = False
 SEMILLA = 42
 
 FECHA_INICIO = "2023-10-01"
@@ -272,32 +269,8 @@ def guardar_csv(datos):
 
 
 # PASO 4: Cargar los datos en SQL Server
-def buscar_driver():
-    # usa solo los drivers modernos (el antiguo 'SQL Server' no sirve)
-    drivers = [d for d in pyodbc.drivers() if d.startswith("ODBC Driver") and "SQL Server" in d]
-    if len(drivers) == 0:
-        print("Drivers que tienes instalados:", pyodbc.drivers())
-        raise SystemExit(
-            "Falta el driver moderno. Instala 'ODBC Driver 18 for SQL Server' "
-            "(búscalo en Google: 'Download ODBC Driver for SQL Server' de Microsoft) "
-            "y vuelve a ejecutar el script."
-        )
-    return sorted(drivers)[-1]
-
-
 def cargar_en_sql_server(datos):
-    driver = buscar_driver()
-    print(f"\nConectando a {SERVIDOR} / {BASE_DATOS} (driver: {driver})")
-
-    conexion = (
-        f"DRIVER={{{driver}}};"
-        f"SERVER={SERVIDOR};"
-        f"DATABASE={BASE_DATOS};"
-        "Trusted_Connection=yes;"
-        "TrustServerCertificate=yes;"
-    )
-    url = "mssql+pyodbc:///?odbc_connect=" + urllib.parse.quote_plus(conexion)
-    motor = create_engine(url, fast_executemany=True)
+    motor = crear_motor()
 
     ventas = datos["Ventas"].copy()
     ventas["fecha"] = ventas["fecha"].dt.date
