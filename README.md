@@ -66,6 +66,10 @@ proyecto-ventas-inventarios/
 │
 ├── esquema_guide.pdf
 │
+├── .env.example          ← plantilla de configuración (sí se sube a GitHub)
+├── .env                  ← tus valores reales (NO se sube a GitHub)
+├── .gitignore
+│
 └── README.md
 ```
 
@@ -149,17 +153,37 @@ source .venv/Scripts/activate
 
 ### 4. Instalar las dependencias
 
-Instala las bibliotecas que utilizan los scripts del proyecto. Como punto de partida:
+Instala las bibliotecas que utilizan los scripts del proyecto:
 
 ```bash
-python -m pip install pandas numpy matplotlib sqlalchemy pyodbc statsmodels scikit-learn
+python -m pip install pandas numpy matplotlib sqlalchemy pyodbc statsmodels scikit-learn python-dotenv
 ```
 
 ### 5. Configurar la conexión a SQL Server
 
-Revisa `python/conexion.py` y configura el servidor, el nombre de la base de datos, el controlador ODBC y el método de autenticación según tu entorno.
+La conexión se configura a través de un archivo `.env` en la raíz del proyecto. **Nunca edites `conexion.py` directamente** para poner tu servidor o contraseña.
 
-No publiques contraseñas, tokens ni otros datos de acceso en GitHub.
+**Pasos:**
+
+1. Copia el archivo de plantilla:
+
+```bash
+cp .env.example .env
+```
+
+2. Abre `.env` y ajusta los valores a tu entorno:
+
+```env
+DB_SERVIDOR=NombreDeTuServidor
+DB_BASE_DATOS=VentasInventario
+DB_AUTH=windows
+```
+
+> **Métodos de autenticación disponibles:**
+> - `DB_AUTH=windows` → Windows Authentication (recomendado, no requiere usuario ni contraseña).
+> - `DB_AUTH=sql` → SQL Server Authentication. En este caso también define `DB_USUARIO` y `DB_PASSWORD` en el `.env`.
+
+> ⚠️ El archivo `.env` está en `.gitignore` y **no se subirá a GitHub**. El archivo `.env.example` sí se sube y sirve como referencia para otros colaboradores.
 
 ## ▶️ Ejecución del proyecto
 
