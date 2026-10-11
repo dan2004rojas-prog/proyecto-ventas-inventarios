@@ -66,8 +66,8 @@ proyecto-ventas-inventarios/
 │
 ├── esquema_guide.pdf
 │
-├── .env.example          ← plantilla de configuración (sí se sube a GitHub)
-├── .env                  ← tus valores reales (NO se sube a GitHub)
+├── .env.example          
+├── .env                  
 ├── .gitignore
 │
 └── README.md
